@@ -1,7 +1,14 @@
-const hre = require('hardhat')
+const path = require('path')
+const uploadToIPFS = require('./uploadMetadata')
+
+async function deployMetadata() {
+	// Upload a single JPEG to IPfS and retrieve the CID
+	let cid = await uploadToIPFS()
+	// Upload a directory of metadta files
+}
 
 async function main() {
-	deployMetadata()
+	await deployMetadata()
 
 	// We get the contract to deploy
 	const TableNFT = await ethers.getContractFactory('TableNFT')
