@@ -4,7 +4,7 @@ This project is the first in a series of many. It walks through the basics of ho
 
 # Overview
 
-This project allows developers to take the a set of images, upload them to IPFS, and then write the corresponding output (CID) to metadata files (which originally have empty `image` fields). The only admin dependency is creating an account at Protocol Lab's (NFT.Storage)[https://nft.storage/], which provides a suite of APIs to upload & pin files to IPFS. The project hierarchy is as follows:
+This project allows developers to take the a set of images, upload them to IPFS, and then write the corresponding output (CID) to metadata files (which originally have empty `image` fields). The only admin dependency is creating an account at Protocol Lab's [NFT.Storage](https://nft.storage/), which provides a suite of APIs to upload & pin files to IPFS. The project hierarchy is as follows:
 
 ```
 .
@@ -36,8 +36,8 @@ Namely, the project is broken into the following:
 ## Setup
 
 1. Clone this repo: `git clone https://github.com/dtbuchholz/table-nft`
-2. Create an nft.storage account: (here)[https://nft.storage/login/]
-3. Create an API key & save it locally as `NFT_STORAGE_KEY` in a `.env` file: (here)[https://nft.storage/manage/]
+2. Create an nft.storage account: [here](https://nft.storage/login/)
+3. Create an API key & save it locally as `NFT_STORAGE_KEY` in a `.env` file: [here](https://nft.storage/manage/)
 4. Run any of the scripts defined below
 
 ## Available Scripts
