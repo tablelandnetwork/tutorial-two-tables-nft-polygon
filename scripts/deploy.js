@@ -1,8 +1,11 @@
-const path = require('path')
+const hre = require('hardhat')
 const uploadMetadataToIpfs = require('./uploadMetadataToIpfs')
 
+/**
+ * Primary script to deploy the NFT, first writing the metadata & pushing to IPFS with `uploadMetadataToIpfs`
+ */
 async function main() {
-	// Pushes/pings metadata to IPFS, as a direcoty of metadata files.
+	// Pushes/pins metadata to IPFS, as a direcoty of metadata files.
 	// Image files exist in `assets`, but `metadata` JSON files do not
 	// initally have the CID in `image`. This uploads & re-writes the metadata files
 	const metadataDirCid = await uploadMetadataToIpfs()

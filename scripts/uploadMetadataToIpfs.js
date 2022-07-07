@@ -6,14 +6,22 @@ const path = require('path')
 const dotenv = require('dotenv')
 dotenv.config()
 
-// Helper to retrieve a single file from some path
+/**
+ * Helper to retrieve a single file from some path
+ * @param filePath The path of a file to retrieve
+ * @return {File} A file from the specified file path
+ */
 async function fileFromPath(filePath) {
 	const content = await fs.promises.readFile(filePath)
 	const type = mime.getType(filePath)
 	return new File([content], path.basename(filePath), { type })
 }
 
-// Upload the image to IPFS and return its CID
+/**
+ * Upload the image to IPFS and return its CID
+ * @param id The id of the NFT, matching with the `assets` and `metadata` directories
+ * @return Resulting CID from pushing the image to IPFS
+ */
 async function uploadImageToIpfs(id) {
 	// Find & load the file from disk
 	const imagePath = path.join(__dirname, '..', 'assets', `${id}.jpeg`)
@@ -25,7 +33,10 @@ async function uploadImageToIpfs(id) {
 	return imageCid
 }
 
-// Update the existing metadata file, changing the 'image' to the `ipfs://{imageCid}`
+/**
+ * Update the existing metadata file, changing the 'image' to the `ipfs://{imageCid}`
+ * @param {*} id The id of the NFT, matching with the `assets` and `metadata` directories
+ */
 async function writeImageCidToMetadata(id) {
 	// Retrieve CID from uploaded image file
 	const imageCid = await uploadImageToIpfs(id)
@@ -52,6 +63,10 @@ async function writeImageCidToMetadata(id) {
 	}
 }
 
+/**
+ * Upload metadata to IPFS, taking the functions above and then pushing the `metadata` directory to IPFS
+ * @return CID of the resulting directory on IPFS
+ */
 async function uploadMetadataToIpfs() {
 	// Load the `metadata` directory path, holding the metadata files
 	const metadataDirPath = path.join(__dirname, '..', 'metadata')
