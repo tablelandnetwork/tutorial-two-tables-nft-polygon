@@ -4,18 +4,31 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 contract TableNFT is ERC721 {
-    uint256 public tokenCounter;
+    // A URI used to reference off-chain metadata
+    string public baseURIString;
+    // A token counter, to track NFT `tokenId`
+    uint256 public tokenId;
 
+    /**
+        @dev Initialize TableNFT
+     */
     constructor() ERC721("TableNFT", "TNFT") {
-        tokenCounter = 0;
+        // Initialize with token counter at zero
+        tokenId = 0;
     }
 
-    function _baseURI() internal pure override returns (string memory) {
-        return "{TODO_ipfs_gateway_to_directory_cid}";
+    /**
+        @dev Must override the default implementation, which returns an empty string
+     */
+    function _baseURI() internal view override returns (string memory) {
+        return baseURIString;
     }
 
+    /** 
+        @dev Mint an NFT, incrementing the `tokenId` upon each call
+     */
     function mint() public {
-        _safeMint(msg.sender, tokenCounter);
-        tokenCounter++;
+        _safeMint(msg.sender, tokenId);
+        tokenId++;
     }
 }
