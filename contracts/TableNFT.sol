@@ -11,10 +11,13 @@ contract TableNFT is ERC721 {
 
     /**
         @dev Initialize TableNFT
+        @param baseURI Set the contract's base URI to the IPFS directory CID
      */
-    constructor() ERC721("TableNFT", "TNFT") {
+    constructor(string memory baseURI) ERC721("TableNFT", "TNFT") {
         // Initialize with token counter at zero
         tokenId = 0;
+        // Set the base URI
+        baseURIString = baseURI;
     }
 
     /**
