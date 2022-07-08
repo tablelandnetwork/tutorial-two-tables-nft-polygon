@@ -6,10 +6,13 @@ const path = require('path')
 const dotenv = require('dotenv')
 dotenv.config()
 
+// The NFT.Storage API token, passed to `NFTStorage` function as a `token`
+const nftStorageApiKey = process.env.NFT_STORAGE_API_KEY
+
 /**
  * Helper to retrieve a single file from some path
  * @param filePath The path of a file to retrieve
- * @return {File} A file from the specified file path
+ * @return A file from the specified file path
  */
 async function fileFromPath(filePath) {
 	const content = await fs.promises.readFile(filePath)
@@ -27,7 +30,7 @@ async function uploadImageToIpfs(id) {
 	const imagePath = path.join(__dirname, '..', 'assets', `${id}.jpeg`)
 	const image = await fileFromPath(imagePath)
 	// Upload to IPFS using NFT Storage
-	const storage = new NFTStorage({ token: process.env.NFT_STORAGE_KEY })
+	const storage = new NFTStorage({ token: nftStorageApiKey })
 	const imageCid = await storage.storeBlob(image)
 	// Return the image's CID
 	return imageCid
@@ -35,7 +38,7 @@ async function uploadImageToIpfs(id) {
 
 /**
  * Update the existing metadata file, changing the 'image' to the `ipfs://{imageCid}`
- * @param {*} id The id of the NFT, matching with the `assets` and `metadata` directories
+ * @param id The id of the NFT, matching with the `assets` and `metadata` directories
  */
 async function writeImageCidToMetadata(id) {
 	// Retrieve CID from uploaded image file
@@ -51,8 +54,8 @@ async function writeImageCidToMetadata(id) {
 	}
 	// Parse metatadata buffer (from 'readFile') to JSON
 	const metadataJson = JSON.parse(metadataFile.toString())
-	// Overwrite the empty 'image' with the IPFS CID
-	metadataJson.image = `ipfs://${imageCid}`
+	// Overwrite the empty 'image' with the IPFS CID at the NFT.Storage gateway
+	metadataJson.image = `https://${imageCid}.ipfs.nftstorage.link/`
 	// Write the file to the metadata directory
 	const metadataFileBuffer = Buffer.from(JSON.stringify(metadataJson))
 	try {
@@ -83,7 +86,7 @@ async function uploadMetadataToIpfs() {
 
 	// Upload the metadata files to IPFS, now containing the image CID
 	// Start by creating a new NFTStorage client using the API key
-	const storage = new NFTStorage({ token: process.env.NFT_STORAGE_KEY })
+	const storage = new NFTStorage({ token: nftStorageApiKey })
 	const directoryCid = await storage.storeDirectory(metadataFiles)
 	// Return the directory's CID
 	return directoryCid
