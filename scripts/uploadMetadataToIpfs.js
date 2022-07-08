@@ -39,8 +39,9 @@ async function uploadImageToIpfs(id) {
 /**
  * Update the existing metadata file, changing the 'image' to the `ipfs://{imageCid}`
  * @param id The id of the NFT, matching with the `assets` and `metadata` directories
+ * @retun JSON object of parsed metadata file with CID written to 'image' field
  */
-async function writeImageCidToMetadata(id) {
+async function parseMetadataToJson(id) {
 	// Retrieve CID from uploaded image file
 	const imageCid = await uploadImageToIpfs(id)
 	// Find the corresponding metadata file (matching `id`)
@@ -48,7 +49,6 @@ async function writeImageCidToMetadata(id) {
 	let metadataFile
 	try {
 		metadataFile = await fs.promises.readFile(metadataFilePath)
-		console.log(`Successfully read metadata file: ${id}`)
 	} catch (error) {
 		console.error(`Error reading file in metadata directory: ${id}`)
 	}
@@ -60,17 +60,20 @@ async function writeImageCidToMetadata(id) {
 	const metadataFileBuffer = Buffer.from(JSON.stringify(metadataJson))
 	try {
 		await fs.promises.writeFile(metadataFilePath, metadataFileBuffer)
-		console.log(`Wrote image CID to metadata file: ${id}`)
 	} catch (error) {
 		console.error(`Error writing file in metadata directory: ${id}`)
 	}
+
+	// Return metadata as JSON object
+	return metadataJson
 }
 
 /**
- * Upload metadata to IPFS, taking the functions above and then pushing the `metadata` directory to IPFS
- * @return CID of the resulting directory on IPFS
+ * Prepare metadata as an array of JSON objects
+ * @return Array of metadata files parsed as JSON objects, including the written image CID
  */
-async function uploadMetadataToIpfs() {
+async function prepareMetadata() {
+	const metadata = []
 	// Load the `metadata` directory path, holding the metadata files
 	const metadataDirPath = path.join(__dirname, '..', 'metadata')
 	// Retrieve the updated files -- pass the metadata directory and strip off the `metadata` prefix, leaving only the file name
@@ -78,18 +81,18 @@ async function uploadMetadataToIpfs() {
 	for await (const file of metadataFiles) {
 		let fileName = file.name.replace(/^\//, '')
 		try {
-			await writeImageCidToMetadata(fileName)
+			// Retrieve the metadata as JSON
+			let metadataJson = await parseMetadataToJson(fileName)
+			// Add a new filed called `id`, which will be used during INSERTs as a unique row `id`
+			metadataJson.id = Number(fileName)
+			metadata.push(await metadataJson)
 		} catch (error) {
-			console.error(`Error writing 'image' field in metadata file: ${fileName}`)
+			console.error(`Error parsing metadata file: ${fileName}`)
 		}
 	}
 
-	// Upload the metadata files to IPFS, now containing the image CID
-	// Start by creating a new NFTStorage client using the API key
-	const storage = new NFTStorage({ token: nftStorageApiKey })
-	const directoryCid = await storage.storeDirectory(metadataFiles)
-	// Return the directory's CID
-	return directoryCid
+	// Return metadata files
+	return metadata
 }
 
-module.exports = uploadMetadataToIpfs
+module.exports = prepareMetadata
