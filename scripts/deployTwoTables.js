@@ -20,9 +20,11 @@ async function main() {
 	console.log(`Deploying to network '${network.name}' with account ${signer.address}`)
 	// Connect to Tableland
 	const tableland = await connect({ signer })
-	// Define the 'main' table's schema as well as the 'attributes' table
-	const mainSchema = `id int, name text, description text, image text, attributes text, primary key (id)`
-	const attributesSchema = `id int, trait_type text, value text, primary key (id)`
+	// Define the 'main' table's schema as well as the 'attributes' table; a primary key should exist
+	// Recall that declaring a primary key must have a unique combination of values in its primary key columns
+	const mainSchema = `id int, name text, description text, image text, primary key (id)`
+	// Should have one `main` row (a token) to many `attributes`, so no need to introduce a primary key constraint
+	const attributesSchema = `id int, trait_type text, value text`
 	// Define the (optional) prefix, noting the main & attributes tables
 	const mainPrefix = 'table_nft_main'
 	const attributesPrefix = 'table_nft_attributes'
@@ -52,20 +54,21 @@ async function main() {
 		throw new Error(`Create table error: could not get '${attributesName}' transaction receipt: ${attributesTxnHash}`)
 	}
 
-	// const mainName = 'table_nft_main_80001_35'
-	// const attributesName = 'table_nft_attributes_80001_36'
-	// Prepare the SQL INSERT statements
+	// Prepare the SQL INSERT statements, which pass the table names to help prepare the statements
+	// It returns an object with keys `main` (a single statement) and `attributes` (an array of statements)
+	// That is, many `attributes` can be inserted for every 1 entry/row in `main`
 	const sqlInsertStatements = await prepareSqlForTwoTables(mainName, attributesName)
 	// Insert metadata into both the 'main' and 'attributes' tables, before smart contract deployment
+	console.log(`Writing metadata to tables...`)
 	for await (let statement of sqlInsertStatements) {
 		const { main, attributes } = statement
 		// Call 'write' with both INSERT statements; optionally, log it to show some SQL queries
 		await tableland.write(main)
-		console.log(main)
-		// Recall that `attributes` is an array of SQL statements for each `trait_type`
+		console.log(`Main table: ${main}`)
+		// Recall that `attributes` is an array of SQL statements for each `trait_type` and `value` for a `tokenId`
 		for await (let attribute of attributes) {
 			await tableland.write(attribute)
-			console.log(attribute)
+			console.log(`Attributes table: ${attribute}`)
 		}
 	}
 
@@ -82,6 +85,16 @@ async function main() {
 	console.log(`TwoTablesNFT contract deployed on ${network.name} at: ${twoTablesNFT.address}`)
 	const baseURI = await twoTablesNFT.baseURIString()
 	console.log(`TwoTablesNFT is using baseURI: ${baseURI}`)
+
+	// For demonstration purposes, mint a token so that `tokenURI` can be called
+	const mintToken = await twoTablesNFT.mint()
+	const mintTxn = await mintToken.wait()
+	// For demonstration purposes, retrieve the event data from the mint to get the minted `tokenId`
+	const mintReceipient = mintTxn.events[0].args[1]
+	const tokenId = mintTxn.events[0].args[2]
+	console.log(`NFT minted: tokenId '${tokenId.toNumber()}' to owner '${mintReceipient}'`)
+	const tokenURI = await twoTablesNFT.tokenURI(0)
+	console.log(`\nSee an example of 'tokenURI' here:\n${tokenURI}`)
 }
 
 main()
