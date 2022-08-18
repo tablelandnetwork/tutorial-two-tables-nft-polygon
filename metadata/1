@@ -1,11 +1,15 @@
 {
 	"name": "TableNFT Rigs #1",
-	"description": "A Tableland NFT demo -- deploying metadata on IPFS",
+	"description": "A Tableland NFT demo -- deploying metadata on Tableland",
 	"image": "",
 	"attributes": [
 		{
 			"trait_type": "Fleet",
 			"value": "Tumblers"
+		},
+		{
+			"trait_type": "Role",
+			"value": "User"
 		}
 	]
 }
