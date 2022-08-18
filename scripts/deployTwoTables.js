@@ -29,7 +29,6 @@ async function main() {
 	const attributesPrefix = "table_nft_attributes"
 
 	// Create the main table and retrieve its returned `name` and on-chain tx as `txnHash`
-	let validateCreate = await tableland.vali
 	const { name: mainName, txnHash: mainTxnHash } = await tableland.create(mainSchema, { prefix: mainPrefix })
 	// Wait for the main table to be "officially" created (i.e., tx is included in a block)
 	// If you do not, you could be later be inserting into a non-existent table
