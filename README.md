@@ -1,28 +1,29 @@
 # NFT Minting Demo -- Metadata on IPFS
 
-This project is the first in a series of many. It walks through the basics of how to deploy an NFT, starting with a bare bones setup. Deploy local metadata files to IPFS, push the NFT smart contract to Polygon Mumbai, and view it all on OpenSea.
+This tutorial shows developers how to use Tablelanad for NFT metadata in a two table deployment model.
 
-# Overview
+## Overview
 
-This project allows developers to take the a set of images, upload them to IPFS, and then write the corresponding output (CID) to metadata files (which originally have empty `image` fields). The only "admin" requirement is creating an account at Protocol Lab's [NFT.Storage](https://nft.storage/), which provides a suite of APIs to upload & pin files to IPFS (with gateway access, too). The project structure is as follows:
+The goal of this project is to take some metadata files hosted locally (in `assets` and `images`) and walk through how to take the a set of images, upload them to IPFS, and combine them with local metadata JSON files (which originally have empty `image` fields). The metadata is parsed into SQL statements, which are used in a `hardhat` deployment of a `TwoTablesNFT` smart contract.
 
 ```
 ├── README.md
-├── assets
+├── images
 │   ├── 0.jpeg
 │   └── 1.jpeg
+├── contracts
+│   └── TwoTablesNFT.sol
+├── hardhat.config.js
 ├── metadata
 │   ├── 0
 │   └── 1
-├── contracts
-│   └── TableNFT.sol
-├── flattenedTableNFT.sol
-├── hardhat.config.js
 ├── package-lock.json
 ├── package.json
 ├── scripts
-│   ├── deploy.js
-│   └── uploadMetadataToIpfs.js
+│   ├── deployTwoTables.js
+│   ├── prepareSql.js
+│   ├── metadataProcessing.js
+│   └── verifyTwoTables.js
 └── test
 │   └── test.js
 └── .env
@@ -30,13 +31,16 @@ This project allows developers to take the a set of images, upload them to IPFS,
 
 Namely, the project is broken into the following:
 
-- `assets` => A couple of sample images, but any number can be included -- these will be uploaded to IPFS.
-- `metadata` => The corresponding metadata files for each image, which lack the "image" field value. The metadata files will then be pushed to IPFS, but their "image" fields will first be overwritten by the image's `cid` upon IPFS upload. Must have a 1:1 relationship with matching names (e.g., `0.jpeg` for the image, and `0` for the JSON, omitting the extension).
-- `contracts` => The NFT smart contract (`TableNFT`), which will mint tokens & allow for the `baseURI` to be set.
-- `flattenedTableNFT.sol` => Although non-optimal, this demo leverages a "manual" process for verifying a smart contract on Polygon, which requires smart contract flattening (into a single file), some comments cleanup, and UI upload on [Polygonscan](https://polygonscan.com/). Optional step to do (or, can automate, instead).
-- `hardhat.config.js` => Some useful deployment configs, including gateways to the proper node provider on Ethereum Goerli & Polygon Mumbai testnets -- and also loading the private key from `.env` for live testnet deployment.
-- `scripts` => `uploadMetadataToIpfs` will look for images in `assets`, upload them to IPFS, write these CIDs to the corresponding `metadata` file, and upload the `metadata` directory to IPFS. Then, `deploy.js` will handle the smart contract deployment & set the `baseURI` to this `metadata` directory's CID, allowing `baseURI` and `tokenURI` to be called using this IPFS CID.
-- `test` => includes some simple `chai` tests with `ethers` as well, including testing out the `tokenURI` is correct.
+- `images` => A couple of sample images, but any images/amount can be included -- these will be uploaded to IPFS. Note that this will be the hardcoded and related to the NFT tokenId.
+- `metadata` => The corresponding metadata files for each image, which lack the "image" field value (empty string by default). The metadata files will have their "image" fields overwritten by the image's `CID` upon IPFS upload. Must have a 1:1 relationship with matching names (e.g., `0.jpeg` for the image, and `0` for the JSON, omitting the extension).
+- `contracts` => The NFT smart contract (`TwoTablesNFT`), which will mint tokens & allow for the `baseURI` to be set that points to the Tableland network. `TwoTablesNFT` is the "recommended" way to do things.
+- `hardhat.config.js` => Some useful deployment configs, including gateways to the proper Alchemy node provider on Polygon Mumbai testnets -- and also loading the private key from `.env` for live testnet deployment.
+- `scripts`:
+  - `metadataProcessing.js` => Look for images in `images`, upload images to IPFS, parse the `metadata` files, write these CIDs to the corresponding JSON/object, and also, return the built object for metadata preparation.
+  - `prepareSql.js` => Take the output from `uploadMetadataToIpfs.js` and build SQL statements.
+  - `deployTwoTables.js` => Deploy the `TwoTablesNFT` contracts, using the output from `prepareSql.js` -- and set the `baseURI` & `tokenURI` to the Tableland gateway (`testnet.tableland.network`).
+  - `verifyTwoTables.js` => Although optional, an additional script that can be used to verify a contract on Polygonscan.
+- `test` => Includes some simple `chai` tests with `ethers` as well, including testing out the `tokenURI` is correct.
 - `.env` => Private variables to store locally, so _do not expose_ these publicly; examples are provided in `.env.example`
 
 ## Setup
@@ -54,15 +58,15 @@ Namely, the project is broken into the following:
 Optionally, if you'd like to deploy to a live testnet, you'll also need to set up the following:
 
 1. Sign up for an Alchemy account: [here](https://auth.alchemyapi.io/signup)
-2. Create an API key & save it locally as `ALCHEMY_POLYGON_MUMBAI_API_KEY` and/or `ALCHEMY_ETH_GOERLI_API_KEY` in `.env`
+2. Create an API key & save it locally as `ALCHEMY_POLYGON_MUMBAI_API_KEY`
 
 ## Example Output
 
-The following details some of the deployed information on Polygon Mumbai:
+The following details some of the deployed information from this tutorial using Polygon Mumbai:
 
-- Contract address: `0x3537C0437792B326fa0747b4A95a8667873e916F`, verified & viewable on [Polygonscan](https://mumbai.polygonscan.com/address/0x3537C0437792B326fa0747b4A95a8667873e916F)
-- Metadata directory on IPFS: [directory](https://bafybeiaq7buu37ubnl4uvxtibux3orf33la7tbcm3kv7jiuzaoet6u7que.ipfs.nftstorage.link/) and minted NFT's [metadata](https://bafybeiaq7buu37ubnl4uvxtibux3orf33la7tbcm3kv7jiuzaoet6u7que.ipfs.nftstorage.link/0) & image (also on IPFS)
-- Listing on OpenSea (Polygon Mumbai testnet): [here](https://testnets.opensea.io/assets/mumbai/0x3537c0437792b326fa0747b4a95a8667873e916f/0)
+- Contract address: `0xeF9ee922f9dD3803228119d0f69f27aAe872F742`, verified & viewable on [Polygonscan](https://mumbai.polygonscan.com/address/0xeF9ee922f9dD3803228119d0f69f27aAe872F742)
+- Metadata on Tableland: [here](https://testnet.tableland.network/query?mode=list&s=SELECT%20json_object%28%27id%27%2Cid%2C%27name%27%2Cname%2C%27description%27%2Cdescription%2C%27attributes%27%2Cjson_group_array%28json_object%28%27trait_type%27%2Ctrait_type%2C%27value%27%2Cvalue%29%29%29%20FROM%20table_nft_main_80001_934%20JOIN%20table_nft_attributes_80001_935%20ON%20table_nft_main_80001_934%2Eid%20%3D%20table_nft_attributes_80001_935%2Emain_id%20WHERE%20id%3D0%20group%20by%20id)
+- Listing on OpenSea (Polygon Mumbai testnet): [here](https://testnets.opensea.io/collection/twotablesnft-gzrcczorea)
 
 ## Available Scripts
 
@@ -80,19 +84,14 @@ npx hardhat test
 
 Deploy the smart contract locally, running the following in different shells. The `deploy.js` script uploads local files to IPFS and sets the CID to the NFT contract's `baseURI`.
 
-```
-npx hardhat node
-npx hardhat run scripts/deploy.js --network hardhat
-```
-
-Or to deploy to live testnets like Ethereum Goerli:
-
-```
-npx hardhat run scripts/deploy.js --network ethereum-goerli
-```
-
-And/or Polygon Mumbai (note: OpenSea supports the Polygon testnet but does not have support for Ethereum Goerli):
+Deploy to live testnets like Polygon Mumbai
 
 ```
 npx hardhat run scripts/deploy.js --network polygon-mumbai
+```
+
+And Optionally, instead of verifying the contract in `deployTwoTables.js`, you can do:
+
+```
+npx hardhat run scripts/verifyTwoTables.js --network "polygon-mumbai"
 ```

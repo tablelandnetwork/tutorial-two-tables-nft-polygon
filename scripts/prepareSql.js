@@ -1,32 +1,8 @@
-// The script required to upload metadata to IPFS
-const prepareMetadata = require('./uploadMetadataToIpfs')
-const dotenv = require('dotenv')
+// The `prepareMetadata` script is required for IPFS image uploading
+// and preparing the metadata as JS objects.
+const prepareMetadata = require("./metadataProcessing")
+const dotenv = require("dotenv")
 dotenv.config()
-
-/**
- * Prepare metadata for Tableland as SQL insert statements within a single table (note: not a best practice).
- * @param {string} tableName The name of the Tableland table to insert metadata values into.
- * @return {string[]} An array of SQL statements for metadata table writes.
- */
-async function prepareSqlForOneTable(tableName) {
-	// Prepare the metadata (handles all of the IPFS-related actions & JSON parsing)
-	const metadata = await prepareMetadata()
-	// An array to hold interpolated SQL INSERT statements, using the JSON metadata values
-	const sqlInsertStatements = []
-	for await (let obj of metadata) {
-		// A classic INSERT statement -- all data is getting written to a single table
-		// Schema: id int, name text, description text, image text, attributes text
-		const { id, name, description, image, attributes } = obj
-		const statement = `INSERT INTO ${tableName} (id, name, description, image, attributes) VALUES (${id}, '${name}', '${description}', '${image}', '${JSON.stringify(
-			attributes
-		)}');`
-		// Note the need above to stringify the attributes
-		sqlInsertStatements.push(statement)
-	}
-
-	// Return the final prepare array of SQL INSERT statements
-	return sqlInsertStatements
-}
 
 /**
  * Prepare metadata for Tableland as SQL insert statements but in two tables ('main' and 'attributes').
@@ -52,7 +28,7 @@ async function prepareSqlForTwoTables(mainTable, attributesTable) {
 			const { trait_type, value } = attribute
 			// INSERT statement for a separate 'attributes' table that holds attribute data, keyed by the NFT tokenId
 			// Schema: id int, trait_type text, value text
-			const attributesStatement = `INSERT INTO ${attributesTable} (id, trait_type, value) VALUES (${id},'${trait_type}', '${value}');`
+			const attributesStatement = `INSERT INTO ${attributesTable} (main_id, trait_type, value) VALUES (${id}, '${trait_type}', '${value}');`
 			attributesTableStatements.push(attributesStatement)
 		}
 
@@ -65,8 +41,8 @@ async function prepareSqlForTwoTables(mainTable, attributesTable) {
 		sqlInsertStatements.push(statement)
 	}
 
-	// Return the final prepare array of SQL INSERT statements
+	// Return the final prepared array of SQL INSERT statements
 	return sqlInsertStatements
 }
 
-module.exports = { prepareSqlForOneTable, prepareSqlForTwoTables }
+module.exports = { prepareSqlForTwoTables }
