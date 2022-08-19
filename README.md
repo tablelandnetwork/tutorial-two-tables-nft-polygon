@@ -1,12 +1,12 @@
-# NFT Minting Demo -- Metadata on IPFS
+# Minting an NFT with Tableland + Polygon
 
-This tutorial shows developers how to use Tablelanad for NFT metadata in a two table deployment model.
+This tutorial shows developers how to use Tablelanad for NFT metadata in a two table composable deployment model, using Polygon + SQL. For a full walkthrough, check out the writeup [here](https://docs.tableland.xyz/deploying-an-nft-on-polygon).
 
 ## Overview
 
-The goal of this project is to take some metadata files hosted locally (in `assets` and `images`) and walk through how to take the a set of images, upload them to IPFS, and combine them with local metadata JSON files (which originally have empty `image` fields). The metadata is parsed into SQL statements, which are used in a `hardhat` deployment of a `TwoTablesNFT` smart contract.
+The goal of this project is to show developers how to use Tableland + Polygon for metadta. There are a number of scripts that read some metadata files hosted locally (in `metadata` and `images`). It walks through how to take the set of images, upload them to IPFS, and combine them with local metadata JSON files (which originally have empty `image` fields) into ERC721 compliant objects. Then, the metadata is parsed into SQL statements for Tableland useage, which are used in a `hardhat` deployment of a `TwoTablesNFT` smart contract. Polygon is used for deploying the tables and the NFT smart contract.
 
-```
+```text
 ├── README.md
 ├── images
 │   ├── 0.jpeg
@@ -31,9 +31,9 @@ The goal of this project is to take some metadata files hosted locally (in `asse
 
 Namely, the project is broken into the following:
 
-- `images` => A couple of sample images, but any images/amount can be included -- these will be uploaded to IPFS. Note that this will be the hardcoded and related to the NFT tokenId.
-- `metadata` => The corresponding metadata files for each image, which lack the "image" field value (empty string by default). The metadata files will have their "image" fields overwritten by the image's `CID` upon IPFS upload. Must have a 1:1 relationship with matching names (e.g., `0.jpeg` for the image, and `0` for the JSON, omitting the extension).
-- `contracts` => The NFT smart contract (`TwoTablesNFT`), which will mint tokens & allow for the `baseURI` to be set that points to the Tableland network. `TwoTablesNFT` is the "recommended" way to do things.
+- `images` => A couple of sample images, but any images/amount can be included -- these will be uploaded to IPFS. Note that these will be related to the NFT's `tokenId`.
+- `metadata` => The corresponding metadata files for each image, which lack the "image" field value (empty string by default). The metadata files will have their "image" values overwritten by the image's `CID` upon IPFS upload. These JSON files must have a 1:1 relationship to images, with matching names (e.g., `0.jpeg` for the image, and `0` for the JSON, omitting the extension).
+- `contracts` => The NFT smart contract (`TwoTablesNFT`), which will mint tokens & allow for the `baseURI` to be set that points to the Tableland network. `TwoTablesNFT` is the "recommended" way to do things where two Tableland tables (_main_ and _attributes_) are used and composed with SQL.
 - `hardhat.config.js` => Some useful deployment configs, including gateways to the proper Alchemy node provider on Polygon Mumbai testnets -- and also loading the private key from `.env` for live testnet deployment.
 - `scripts`:
   - `metadataProcessing.js` => Look for images in `images`, upload images to IPFS, parse the `metadata` files, write these CIDs to the corresponding JSON/object, and also, return the built object for metadata preparation.
@@ -45,20 +45,12 @@ Namely, the project is broken into the following:
 
 ## Setup
 
-1. Clone this repo:
-
-   ```
-   git clone https://github.com/dtbuchholz/table-nft
-   ```
-
-2. Create an nft.storage account: [here](https://nft.storage/login/)
-3. Create an API key & save it locally as `NFT_STORAGE_API_KEY` in a `.env` file: [here](https://nft.storage/manage/)
-4. Run any of the scripts defined below
-
-Optionally, if you'd like to deploy to a live testnet, you'll also need to set up the following:
-
-1. Sign up for an Alchemy account: [here](https://auth.alchemyapi.io/signup)
-2. Create an API key & save it locally as `ALCHEMY_POLYGON_MUMBAI_API_KEY`
+1. Clone this repo to use the `images` and `metadata` files (and to view the final code).
+2. Export your private key and save it in a `.env` file as `PRIVATE_KEY`. Steps 3-5 will do something similar.
+3. Create an nft.storage account ([here](https://nft.storage/login/)), an API key ([here](https://nft.storage/manage/)), and save it locally as `NFT_STORAGE_API_KEY`.
+4. Sign up for an Alchemy account ([here](https://auth.alchemyapi.io/signup)) and save it as `ALCHEMY_POLYGON_MUMBAI_API_KEY`.
+5. Optionally, sign up for a Polygonscan account and save an API key as `POLYGONSCAN_API_KEY`.
+6. Run any of the scripts defined below, such as deploying to Polygon: `npx hardhat run scripts/deploy.js --network polygon-mumbai`
 
 ## Example Output
 
@@ -72,13 +64,13 @@ The following details some of the deployed information from this tutorial using 
 
 Compile the NFT smart contract
 
-```
+```console
 npx hardhat compile
 ```
 
 Run hardhat tests, including validating the `tokenURI` works as expected
 
-```
+```console
 npx hardhat test
 ```
 
@@ -86,12 +78,12 @@ Deploy the smart contract locally, running the following in different shells. Th
 
 Deploy to live testnets like Polygon Mumbai
 
-```
+```console
 npx hardhat run scripts/deploy.js --network polygon-mumbai
 ```
 
 And Optionally, instead of verifying the contract in `deployTwoTables.js`, you can do:
 
-```
-npx hardhat run scripts/verifyTwoTables.js --network "polygon-mumbai"
+```console
+npx hardhat run scripts/verifyTwoTables.js --network polygon-mumbai
 ```
