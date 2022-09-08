@@ -39,7 +39,7 @@ describe("twoTablesNFT", function () {
 		// Validate the `tokenURI` of id `0`
 		let tokenURI = await twoTablesNFT.tokenURI(0)
 		expect(await tokenURI).to.equal(
-			`${tablelandGatewayURI}SELECT%20json_object%28%27id%27%2Cid%2C%27name%27%2Cname%2C%27description%27%2Cdescription%2C%27attributes%27%2Cjson_group_array%28json_object%28%27trait_type%27%2Ctrait_type%2C%27value%27%2Cvalue%29%29%29%20FROM%20${mainTable}%20JOIN%20${attributesTable}%20ON%20${mainTable}%2Eid%20%3D%20${attributesTable}%2Emain_id%20WHERE%20id%3D0%20group%20by%20id`
+			`${tablelandGatewayURI}SELECT%20json_object%28%27id%27%2Cid%2C%27name%27%2Cname%2C%27description%27%2Cdescription%2C%27image%27%2Cimage%2C%27attributes%27%2Cjson_group_array%28json_object%28%27trait_type%27%2Ctrait_type%2C%27value%27%2Cvalue%29%29%29%20FROM%20${mainTable}%20JOIN%20${attributesTable}%20ON%20${mainTable}%2Eid%20%3D%20${attributesTable}%2Emain_id%20WHERE%20id%3D0%20group%20by%20id`
 		)
 	})
 	it("Should fail if more than 2 tokens are attempted to be minted", async function () {

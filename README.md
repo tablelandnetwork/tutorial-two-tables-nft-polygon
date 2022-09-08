@@ -1,10 +1,10 @@
 # Minting an NFT with Tableland + Polygon
 
-This tutorial shows developers how to use Tablelanad for NFT metadata in a two table composable deployment model, using Polygon + SQL. For a full walkthrough, check out the writeup [here](https://docs.tableland.xyz/deploying-an-nft-on-polygon).
+This tutorial shows developers how to use Tableland for NFT metadata in a two table composable deployment model, using Polygon + SQL. For a full walkthrough, check out the writeup [here](https://docs.tableland.xyz/deploying-an-nft-on-polygon).
 
 ## Overview
 
-The goal of this project is to show developers how to use Tableland + Polygon for metadta. There are a number of scripts that read some metadata files hosted locally (in `metadata` and `images`). It walks through how to take the set of images, upload them to IPFS, and combine them with local metadata JSON files (which originally have empty `image` fields) into ERC721 compliant objects. Then, the metadata is parsed into SQL statements for Tableland useage, which are used in a `hardhat` deployment of a `TwoTablesNFT` smart contract. Polygon is used for deploying the tables and the NFT smart contract.
+The goal of this project is to show developers how to use Tableland + Polygon for metadata. There are a number of scripts that read some metadata files hosted locally (in `metadata` and `images`). It walks through how to take the set of images, upload them to IPFS, and combine them with local metadata JSON files (which originally have empty `image` fields) into ERC721 compliant objects. Then, the metadata is parsed into SQL statements for Tableland usage, which are used in a `hardhat` deployment of a `TwoTablesNFT` smart contract. Polygon is used for deploying the tables and the NFT smart contract.
 
 ```text
 ├── README.md
@@ -56,9 +56,11 @@ Namely, the project is broken into the following:
 
 The following details some of the deployed information from this tutorial using Polygon Mumbai:
 
-- Contract address: `0xeF9ee922f9dD3803228119d0f69f27aAe872F742`, verified & viewable on [Polygonscan](https://mumbai.polygonscan.com/address/0xeF9ee922f9dD3803228119d0f69f27aAe872F742)
-- Metadata on Tableland: [here](https://testnet.tableland.network/query?mode=list&s=SELECT%20json_object%28%27id%27%2Cid%2C%27name%27%2Cname%2C%27description%27%2Cdescription%2C%27attributes%27%2Cjson_group_array%28json_object%28%27trait_type%27%2Ctrait_type%2C%27value%27%2Cvalue%29%29%29%20FROM%20table_nft_main_80001_934%20JOIN%20table_nft_attributes_80001_935%20ON%20table_nft_main_80001_934%2Eid%20%3D%20table_nft_attributes_80001_935%2Emain_id%20WHERE%20id%3D0%20group%20by%20id)
-- Listing on OpenSea (Polygon Mumbai testnet): [here](https://testnets.opensea.io/collection/twotablesnft-gzrcczorea)
+- Contract address: `0xDAa7F50C50018D7332da819be275693cA9604178`, verified & viewable on [Polygonscan](https://mumbai.polygonscan.com/address/0xDAa7F50C50018D7332da819be275693cA9604178)
+- Main table creation transaction: [0x2016f295221c235f62d89b44f8d6a51096a58c0a2722e93f2c2133e5471d0737](https://mumbai.polygonscan.com/tx/0x2016f295221c235f62d89b44f8d6a51096a58c0a2722e93f2c2133e5471d0737)
+- Attributes table creation transaction: [0x9f8e874bec740dc1299fe0357a9b093f1938272311948437072de8a2b91c5f04](https://mumbai.polygonscan.com/tx/0x9f8e874bec740dc1299fe0357a9b093f1938272311948437072de8a2b91c5f04)
+- NFT metadata on Tableland: [here](https://testnet.tableland.network/query?mode=list&s=SELECT%20json_object%28%27id%27%2Cid%2C%27name%27%2Cname%2C%27description%27%2Cdescription%2C%27image%27%2Cimage%2C%27attributes%27%2Cjson_group_array%28json_object%28%27trait_type%27%2Ctrait_type%2C%27value%27%2Cvalue%29%29%29%20FROM%20table_nft_main_80001_1510%20JOIN%20table_nft_attributes_80001_1511%20ON%20table_nft_main_80001_1510%2Eid%20%3D%20table_nft_attributes_80001_1511%2Emain_id%20WHERE%20id%3D0%20group%20by%20id)
+- Listing on OpenSea (Polygon Mumbai testnet): [here](https://testnets.opensea.io/collection/twotablesnft)
 
 ## Available Scripts
 
