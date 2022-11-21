@@ -13,7 +13,7 @@
 	},
 	"dependencies": {
 		"@openzeppelin/contracts": "^4.7.3",
-		"@tableland/sdk": "^3.1.2",
+		"@tableland/sdk": "^3.1.5",
 		"dotenv": "^16.0.1",
 		"files-from-path": "^0.2.6",
 		"mime": "^3.0.0",
