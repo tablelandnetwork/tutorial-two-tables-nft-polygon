@@ -83,7 +83,7 @@ async function main() {
 
 	// Set the Tableand gateway as the `baseURI` where a `tokenId` will get appended upon `tokenURI` calls
 	// Note that `mode=list` will format the metadata per the ERC721 standard
-	const tablelandBaseURI = `https://testnet.tableland.network/query?mode=list&s=`
+	const tablelandBaseURI = `https://testnets.tableland.network/query?mode=list&s=`
 	// Get the contract factory to create an instance of the  TwoTablesNFT contract
 	const TwoTablesNFT = await ethers.getContractFactory("TwoTablesNFT")
 	// Deploy the contract, passing `tablelandBaseURI` in the constructor's `baseURI` and using the Tableland gateway

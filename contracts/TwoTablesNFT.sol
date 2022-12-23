@@ -12,7 +12,7 @@ contract TwoTablesNFT is ERC721 {
     // This is not necessarily a best practice but makes it easy to call public getters
 
     /// A URI used to reference off-chain metadata.
-    // This will use the Tableland gateway and query: https://testnet.tableland.network/query?mode=list&s=
+    // This will use the Tableland gateway and query: https://testnets.tableland.network/query?mode=list&s=
     // See the `query?mode=list&s=` appended -- a SQL query `s` and mode to format to ERC721 standard
     string public baseURIString;
     /// The name of the main metadata table in Tableland
@@ -66,13 +66,9 @@ contract TwoTablesNFT is ERC721 {
      *  @dev Must override the default implementation, which simply appends a `tokenId` to _baseURI.
      *  tokenId - The id of the NFT token that is being requested
      */
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        virtual
-        override
-        returns (string memory)
-    {
+    function tokenURI(
+        uint256 tokenId
+    ) public view virtual override returns (string memory) {
         require(
             _exists(tokenId),
             "ERC721Metadata: URI query for nonexistent token"

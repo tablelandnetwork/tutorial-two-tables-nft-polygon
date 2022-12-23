@@ -13,7 +13,7 @@ describe("twoTablesNFT", function () {
 	// Set up some common variables used throughout, as defined in the `deploy` script
 	before(async () => {
 		;[owner, addr1] = await ethers.getSigners()
-		tablelandGatewayURI = "https://testnet.tableland.network/query?mode=list&s="
+		tablelandGatewayURI = "https://testnets.tableland.network/query?mode=list&s="
 		mainTable = "table_nft_main_80001_1" // Make up some table prefix_chainId_tableId
 		attributesTable = "table_nft_attributes_80001_2"
 		TwoTablesNFT = await ethers.getContractFactory("TwoTablesNFT")
